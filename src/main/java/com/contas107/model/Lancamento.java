@@ -1,6 +1,7 @@
 package com.contas107.model;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 
 import jakarta.persistence.Column;
@@ -32,7 +33,11 @@ public class Lancamento {
 	
 	@Temporal(TemporalType.DATE)
 	@Column(name = "DATA_LANCAMENTO", nullable = false)
-	Date dataLancamento;
+	LocalDate dataLancamento;
+	
+	@Temporal(TemporalType.DATE)
+	@Column(name = "DATA_VENCIMENTO", nullable = false)
+	LocalDate dataVencimento;
 	
 	@Column(name = "EMPRESA", nullable = false, length = 255)
 	String empresa;

@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.contas107.model.Banco;
 import com.contas107.repository.BancoRepository;
+import com.contas107.service.BancoService;
 
 import lombok.AllArgsConstructor;
 
@@ -23,22 +24,18 @@ import lombok.AllArgsConstructor;
 public class BancoController {
 
 	@Autowired
-	private final BancoRepository bancoRepository;
+	private final BancoService bancoService;
 	
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public Banco salvar(@RequestBody Banco banco) {
-            try {
-                return bancoRepository.save(banco);
-            } catch (Exception e) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Erro ao salvar o Banco. 🙁", e);
-            }
+		return bancoService.salvarBanco(banco);
 	}
 	
 	@GetMapping()
 	@ResponseStatus(HttpStatus.OK)
 	public List<Banco> listarTodos () {
-		return bancoRepository.findAll();
+		return bancoService.obterTodosBancos();
 	}
 	
 }
