@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.contas107.DTO.BancoDTO;
 import com.contas107.DTO.LancamentoRequestDTO;
 import com.contas107.DTO.LancamentoResponseDTO;
+import com.contas107.DTO.TotalEmpresaDTO;
 import com.contas107.service.LancamentoService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -183,6 +185,41 @@ public class LancamentoController {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nenhum lançamento encontrado para o mês: " + mes);
 		}
 		return lancamentoService.obterTotalGastoNoMes(mes);
+	}
+
+	@GetMapping("/total-por-banco-no-mes/{idBanco}/{mes}")
+	@ResponseStatus(HttpStatus.OK)
+	@Operation(summary = "Total gasto por banco", description = "Retorna o total gasto em lançamentos associados a um banco específico.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Total gasto por banco retornado com sucesso"),
+		@ApiResponse(responseCode = "404", description = "Nenhum lançamento encontrado para o banco especificado")
+	})
+	public BigDecimal obterTotalGastoPorBancoNoMes(@PathVariable Long idBanco, @PathVariable int mes) {
+		List<LancamentoResponseDTO> lancamentos = lancamentoService.obterTodosLancamentos();
+		if (lancamentos.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nenhum lançamento encontrado para o banco com ID: " + idBanco);
+		}
+		return lancamentoService.obterTotalGastoPorBancoNoMes(lancamentos, idBanco, mes);
+	}
+
+	@GetMapping("/total-por-empresa/{empresa}")
+	@ResponseStatus(HttpStatus.OK)
+	@Operation(summary = "Total gasto por empresa", description = "Retorna o total gasto em lançamentos associados a uma empresa específica.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Total gasto por empresa retornado com sucesso"),
+		@ApiResponse(responseCode = "404", description = "Nenhum lançamento encontrado para a empresa especificada")
+	})
+	public TotalEmpresaDTO obterTotalGastoPorEmpresa(@PathVariable String empresa) {
+		
+		List<LancamentoResponseDTO> lancamentos = lancamentoService.obterTodosLancamentos();
+		
+		if (lancamentos.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nenhum lançamento encontrado na base: " + empresa + " ⛔");
+		}
+		TotalEmpresaDTO totalGastoPorEmpresa = lancamentoService.obterTotalGastoPorEmpresa(empresa);
+
+		return new TotalEmpresaDTO(totalGastoPorEmpresa.getNome(), totalGastoPorEmpresa.getTotal());
+		
 	}
 	
 }

@@ -2,6 +2,7 @@ package com.contas107.service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -12,8 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.contas107.DTO.BancoDTO;
 import com.contas107.DTO.LancamentoRequestDTO;
 import com.contas107.DTO.LancamentoResponseDTO;
+import com.contas107.DTO.TotalEmpresaDTO;
 import com.contas107.mapstruct.LancamentoMapper;
 import com.contas107.model.Banco;
 import com.contas107.model.Lancamento;
@@ -56,7 +59,7 @@ public class LancamentoService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Banco não encontrado. ⛔");
         }
 
-        if (StringUtils.isNullOrEmpty(lancamento.getDataLancamento().toString())) {
+        if (lancamento.getDataLancamento() == null || StringUtils.isNullOrEmpty(lancamento.getDataLancamento().toString())) {
             lancamento.setDataLancamento(LocalDate.now(ZoneId.of("UTC"))); 
         }
 
@@ -160,6 +163,54 @@ public class LancamentoService {
             .map(LancamentoResponseDTO::getValor)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
         return totalMes;
+    }
+
+    public BigDecimal obterTotalGastoPorBancoNoMes(List<LancamentoResponseDTO> lancamento, Long idBanco, int mes) {
+        List<LancamentoResponseDTO> lancamentos = lancamentoMapper.paraLISTLancamentoResponseDTO(lancamentoRepository.lancamentosNoMes(mes));
+        if (lancamentos.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nenhum lançamento encontrado para o mês: " + mes);
+        }
+        List<LancamentoResponseDTO> lancamentosBanco = lancamentos.stream()
+            .filter(lancamentoBanco -> lancamentoBanco.getBanco().getId().equals(idBanco))
+            .toList();
+        if (lancamentosBanco.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nenhum lançamento encontrado para o banco com ID: " + idBanco + " no mês: " + mes);
+        }
+        BigDecimal totalBanco = lancamentosBanco.stream()
+            .map(LancamentoResponseDTO::getValor)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return totalBanco;
+        
+    }
+
+    public TotalEmpresaDTO obterTotalGastoPorEmpresa(String empresa) {
+        
+        String empresaFormatada = empresa.replaceAll("-", " ");
+
+        List<LancamentoResponseDTO> lancamentos = lancamentoMapper.paraLISTLancamentoResponseDTO(lancamentoRepository.findAll());
+		
+		// Compoe lista com empresas iguais a passada por parametro
+		lancamentos = lancamentos.stream()
+				.filter(lancamento -> lancamento.getEmpresa().equalsIgnoreCase(empresaFormatada))
+				.toList();
+
+		// Se a lista "lancamentos" estiver vazia, lança uma exceção
+		if (lancamentos.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nenhum lançamento encontrado para a empresa: " + empresa + " ⛔");
+		}
+
+		// Se a lista "lancamentos" não estiver vazia, retorna o total gasto por empresa
+	    		BigDecimal totalGasto = lancamentos.stream()
+				.map(LancamentoResponseDTO::getValor)
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        TotalEmpresaDTO retorno = new TotalEmpresaDTO();
+        
+        retorno.setNome(empresaFormatada);
+        retorno.setTotal(totalGasto);
+		
+		return retorno;	  
+
     }
 
 }
