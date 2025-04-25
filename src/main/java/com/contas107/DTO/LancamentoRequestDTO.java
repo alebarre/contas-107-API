@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import com.contas107.model.Banco;
+import com.contas107.model.Empresa;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -25,7 +26,7 @@ public class LancamentoRequestDTO {
     private LocalDate dataVencimento;
 
     @JsonProperty(required = true)
-    private String empresa;
+    private Empresa empresa;
 
     @JsonProperty(required = true)
     private Banco banco;

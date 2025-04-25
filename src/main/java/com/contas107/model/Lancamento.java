@@ -38,9 +38,10 @@ public class Lancamento {
 	@Temporal(TemporalType.DATE)
 	@Column(name = "DATA_VENCIMENTO", nullable = false)
 	LocalDate dataVencimento;
-	
-	@Column(name = "EMPRESA", nullable = false, length = 255)
-	String empresa;
+
+	@ManyToOne
+	@JoinColumn(name = "EMPRESA_ID", nullable = false)
+	Empresa empresa;
 	
 	@ManyToOne
 	@JoinColumn(name = "BANCO_ID", nullable = false)

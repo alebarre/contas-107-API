@@ -183,20 +183,18 @@ public class LancamentoService {
         
     }
 
-    public TotalEmpresaDTO obterTotalGastoPorEmpresa(String empresa) {
-        
-        String empresaFormatada = empresa.replaceAll("-", " ");
+    public TotalEmpresaDTO obterTotalGastoPorEmpresa(Long idEmpresa) {
 
         List<LancamentoResponseDTO> lancamentos = lancamentoMapper.paraLISTLancamentoResponseDTO(lancamentoRepository.findAll());
 		
 		// Compoe lista com empresas iguais a passada por parametro
 		lancamentos = lancamentos.stream()
-				.filter(lancamento -> lancamento.getEmpresa().equalsIgnoreCase(empresaFormatada))
+				.filter(lancamento -> lancamento.getEmpresa().getId().equals(idEmpresa))
 				.toList();
 
 		// Se a lista "lancamentos" estiver vazia, lança uma exceção
 		if (lancamentos.isEmpty()) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nenhum lançamento encontrado para a empresa: " + empresa + " ⛔");
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nenhum lançamento encontrado. ⛔");
 		}
 
 		// Se a lista "lancamentos" não estiver vazia, retorna o total gasto por empresa
@@ -206,7 +204,7 @@ public class LancamentoService {
         
         TotalEmpresaDTO retorno = new TotalEmpresaDTO();
         
-        retorno.setNome(empresaFormatada);
+        retorno.setNome(lancamentos.get(0).getEmpresa().getNome());
         retorno.setTotal(totalGasto);
 		
 		return retorno;	  

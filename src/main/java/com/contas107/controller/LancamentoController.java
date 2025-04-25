@@ -202,21 +202,21 @@ public class LancamentoController {
 		return lancamentoService.obterTotalGastoPorBancoNoMes(lancamentos, idBanco, mes);
 	}
 
-	@GetMapping("/total-por-empresa/{empresa}")
+	@GetMapping("/total-por-empresa/{idEmpresa}")
 	@ResponseStatus(HttpStatus.OK)
 	@Operation(summary = "Total gasto por empresa", description = "Retorna o total gasto em lançamentos associados a uma empresa específica.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "Total gasto por empresa retornado com sucesso"),
 		@ApiResponse(responseCode = "404", description = "Nenhum lançamento encontrado para a empresa especificada")
 	})
-	public TotalEmpresaDTO obterTotalGastoPorEmpresa(@PathVariable String empresa) {
+	public TotalEmpresaDTO obterTotalGastoPorEmpresa(@PathVariable Long idEmpresa) {
 		
 		List<LancamentoResponseDTO> lancamentos = lancamentoService.obterTodosLancamentos();
 		
 		if (lancamentos.isEmpty()) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nenhum lançamento encontrado na base: " + empresa + " ⛔");
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nenhum lançamento encontrado na base ⛔");
 		}
-		TotalEmpresaDTO totalGastoPorEmpresa = lancamentoService.obterTotalGastoPorEmpresa(empresa);
+		TotalEmpresaDTO totalGastoPorEmpresa = lancamentoService.obterTotalGastoPorEmpresa(idEmpresa);
 
 		return new TotalEmpresaDTO(totalGastoPorEmpresa.getNome(), totalGastoPorEmpresa.getTotal());
 		
